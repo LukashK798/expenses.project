@@ -1,13 +1,15 @@
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import path, reverse_lazy
 from .models import Expense, Category
-from .views import ExpenseListView, CategoryListView
+from .views import ExpenseListView, CategoryListView, ExpenseCSVExportView
 
+app_name = "expenses"
 
 urlpatterns = [
     path('expense/list/',
          ExpenseListView.as_view(),
          name='expense-list'),
+
     path('expense/create/',
          CreateView.as_view(
             model=Expense,
@@ -16,6 +18,7 @@ urlpatterns = [
             template_name='generic_update.html'
          ),
          name='expense-create'),
+
     path('expense/<int:pk>/edit/',
          UpdateView.as_view(
             model=Expense,
@@ -24,6 +27,7 @@ urlpatterns = [
             template_name='generic_update.html'
          ),
          name='expense-edit'),
+
     path('expense/<int:pk>/delete/',
          DeleteView.as_view(
             model=Expense,
@@ -32,9 +36,14 @@ urlpatterns = [
          ),
          name='expense-delete'),
 
+    path('expense/export/csv/',
+         ExpenseCSVExportView.as_view(),
+         name='expense-export-csv'),
+
     path('category/list/',
          CategoryListView.as_view(),
          name='category-list'),
+
     path('category/create/',
          CreateView.as_view(
             model=Category,
@@ -43,6 +52,7 @@ urlpatterns = [
             template_name='generic_update.html'
          ),
          name='category-create'),
+
     path('category/<int:pk>/delete/',
          DeleteView.as_view(
             model=Category,

@@ -1,3 +1,6 @@
+import csv
+from django.http import HttpResponse
+from django.views import View
 from django.views.generic.list import ListView
 from .forms import ExpenseSearchForm
 from .models import Expense, Category
@@ -26,6 +29,7 @@ class ExpenseListView(ListView):
             if categories:
                 queryset = queryset.filter(category__in=categories)
 
+        # Sortowanie wyników
         sort_by = self.request.GET.get("sort", "date")
         order = self.request.GET.get("order", "asc")
 
@@ -46,3 +50,34 @@ class ExpenseListView(ListView):
 class CategoryListView(ListView):
     model = Category
     paginate_by = 5
+
+class ExpenseCSVExportView(View):
+    def get(self, request, *args, **kwargs):
+        queryset = Expense.objects.all()
+        form = ExpenseSearchForm(self.request.GET)
+
+        if form.is_valid():
+            name = form.cleaned_data.get("name", "").strip()
+            date_from = form.cleaned_data.get("date_from")
+            date_to = form.cleaned_data.get("date_to")
+            categories = form.cleaned_data.get("categories")
+
+            if name:
+                queryset = queryset.filter(name__icontains=name)
+            if date_from:
+                queryset = queryset.filter(date__gte=date_from)
+            if date_to:
+                queryset = queryset.filter(date__lte=date_to)
+            if categories:
+                queryset = queryset.filter(category__in=categories)
+
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = 'attachment; filename="expenses.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(["Category", "Name", "Amount", "Date"])
+
+        for expense in queryset:
+            writer.writerow([expense.category, expense.name, expense.amount, expense.date])
+
+        return response
