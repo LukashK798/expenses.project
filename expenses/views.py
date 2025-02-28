@@ -29,7 +29,6 @@ class ExpenseListView(ListView):
             if categories:
                 queryset = queryset.filter(category__in=categories)
 
-        # Sortowanie wyników
         sort_by = self.request.GET.get("sort", "date")
         order = self.request.GET.get("order", "asc")
 
@@ -38,10 +37,13 @@ class ExpenseListView(ListView):
         else:
             queryset = queryset.order_by("date" if order == "asc" else "-date")
 
+        total_amount_spent = sum(expense.amount for expense in queryset)
+
         return super().get_context_data(
             form=form,
             object_list=queryset,
             summary_per_category=summary_per_category(queryset),
+            total_amount_spent=total_amount_spent,
             sort_by=sort_by,
             order=order,
             **kwargs
