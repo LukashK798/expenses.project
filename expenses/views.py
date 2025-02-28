@@ -13,8 +13,9 @@ class ExpenseListView(ListView):
         form = ExpenseSearchForm(self.request.GET)
         if form.is_valid():
             name = form.cleaned_data.get('name', '').strip()
-            date_from = self.request.GET.get("date_from")
-            date_to = self.request.GET.get("date_to")
+            date_from = form.cleaned_data.get('date_from')
+            date_to = form.cleaned_data.get('date_to')
+            categories = form.cleaned_data.get('categories')
 
             if name:
                 queryset = queryset.filter(name__icontains=name)
@@ -22,6 +23,8 @@ class ExpenseListView(ListView):
                 queryset = queryset.filter(date__gte=date_from)
             if date_to:
                 queryset = queryset.filter(date__lte=date_to)
+            if categories:
+                queryset = queryset.filter(category__in=categories)
 
         return super().get_context_data(
             form=form,
@@ -33,4 +36,3 @@ class ExpenseListView(ListView):
 class CategoryListView(ListView):
     model = Category
     paginate_by = 5
-
