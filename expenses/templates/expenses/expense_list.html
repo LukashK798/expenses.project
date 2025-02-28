@@ -71,22 +71,26 @@
 <hr>
 <table border="1">
   <caption>Monthly Summary</caption>
-  <tr>
-    <th>Year</th>
-    <th>Month</th>
-    <th>Total Spent</th>
-  </tr>
-  {% for entry in monthly_summary %}
+  <thead>
     <tr>
-      <td>{{ entry.date__year }}</td>
-      <td>{{ entry.date__month }}</td>
-      <td>{{ entry.total_spent|floatformat:2 }}</td>
+      <th>Year</th>
+      <th>Month</th>
+      <th>Total Spent</th>
     </tr>
-  {% empty %}
-    <tr>
-      <td colspan="3">No data available</td>
-    </tr>
-  {% endfor %}
+  </thead>
+  <tbody>
+    {% for entry in monthly_summary %}
+      <tr>
+        <td>{{ entry.date__year }}</td>
+        <td>{{ entry.date__month }}</td>
+        <td>{{ entry.total_spent|floatformat:2 }}</td>
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="3">No data available</td>
+      </tr>
+    {% endfor %}
+  </tbody>
 </table>
 
 {% endblock %}

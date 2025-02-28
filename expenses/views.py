@@ -1,12 +1,12 @@
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.views import View
 from django.views.generic.list import ListView
 from django.db.models import Sum
+from django.db.models.functions import TruncYear, TruncMonth
 from .forms import ExpenseSearchForm
 from .models import Expense, Category
 from .reports import summary_per_category
-from django.utils.timezone import now
 
 class ExpenseListView(ListView):
     model = Expense
@@ -41,9 +41,10 @@ class ExpenseListView(ListView):
 
         monthly_summary = (
             queryset
-            .values("date__year", "date__month")
+            .annotate(year=TruncYear("date"), month=TruncMonth("date"))
+            .values("year", "month")
             .annotate(total_spent=Sum("amount"))
-            .order_by("date__year", "date__month")
+            .order_by("year", "month")
         )
 
         return super().get_context_data(
@@ -90,3 +91,35 @@ class ExpenseCSVExportView(View):
             writer.writerow([expense.category, expense.name, expense.amount, expense.date])
 
         return response
+
+class ExpenseChartDataView(View):
+    def get(self, request, *args, **kwargs):
+        queryset = Expense.objects.all()
+        form = ExpenseSearchForm(request.GET)
+
+        if form.is_valid():
+            name = form.cleaned_data.get("name", "").strip()
+            date_from = form.cleaned_data.get("date_from")
+            date_to = form.cleaned_data.get("date_to")
+            categories = form.cleaned_data.get("categories")
+
+            if name:
+                queryset = queryset.filter(name__icontains=name)
+            if date_from:
+                queryset = queryset.filter(date__gte=date_from)
+            if date_to:
+                queryset = queryset.filter(date__lte=date_to)
+            if categories:
+                queryset = queryset.filter(category__in=categories)
+
+        expenses = queryset.annotate(year=TruncYear("date"), month=TruncMonth("date")) \
+            .values("year", "month") \
+            .annotate(total=Sum("amount")) \
+            .order_by("year", "month")
+
+        data = {
+            "labels": [f"{expense['year'].year}-{expense['month'].month:02d}" for expense in expenses],
+            "data": [expense["total"] for expense in expenses]
+        }
+
+        return JsonResponse(data)

@@ -1,7 +1,7 @@
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.urls import path, reverse_lazy
 from .models import Expense, Category
-from .views import ExpenseListView, CategoryListView, ExpenseCSVExportView
+from .views import ExpenseListView, CategoryListView, ExpenseCSVExportView, ExpenseChartDataView
 
 app_name = "expenses"
 
@@ -39,6 +39,10 @@ urlpatterns = [
     path('expense/export-csv/',
          ExpenseCSVExportView.as_view(),
          name='expense-export-csv'),
+
+    path('expense/chart-data/',
+         ExpenseChartDataView.as_view(),
+         name='expense-chart-data'),
 
     path('category/list/',
          CategoryListView.as_view(),
