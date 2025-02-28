@@ -8,6 +8,7 @@ from .forms import ExpenseSearchForm
 from .models import Expense, Category
 from .reports import summary_per_category
 
+
 class ExpenseListView(ListView):
     model = Expense
     paginate_by = 5
@@ -57,9 +58,11 @@ class ExpenseListView(ListView):
             **kwargs
         )
 
+
 class CategoryListView(ListView):
     model = Category
     paginate_by = 5
+
 
 class ExpenseCSVExportView(View):
     def get(self, request, *args, **kwargs):
@@ -92,6 +95,7 @@ class ExpenseCSVExportView(View):
 
         return response
 
+
 class ExpenseChartDataView(View):
     def get(self, request, *args, **kwargs):
         queryset = Expense.objects.all()
@@ -112,10 +116,13 @@ class ExpenseChartDataView(View):
             if categories:
                 queryset = queryset.filter(category__in=categories)
 
-        expenses = queryset.annotate(year=TruncYear("date"), month=TruncMonth("date")) \
-            .values("year", "month") \
-            .annotate(total=Sum("amount")) \
+        expenses = (
+            queryset
+            .annotate(year=TruncYear("date"), month=TruncMonth("date"))
+            .values("year", "month")
+            .annotate(total=Sum("amount"))
             .order_by("year", "month")
+        )
 
         data = {
             "labels": [f"{expense['year'].year}-{expense['month'].month:02d}" for expense in expenses],
