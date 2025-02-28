@@ -14,15 +14,24 @@
 <table border="1">
 	<caption>Expenses</caption>
 	<thead>
-	  <tr>
-		<th>no.</th>
-		<th>category</th>
-		<th>name</th>
-		<th>amount</th>
-		<th>date</th>
-		<th>actions</th>
-	  </tr>
-	</thead>
+  <tr>
+    <th>no.</th>
+    <th>
+      <a href="?sort=category&order={% if request.GET.sort == 'category' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+        category
+      </a>
+    </th>
+    <th>name</th>
+    <th>amount</th>
+    <th>
+      <a href="?sort=date&order={% if request.GET.sort == 'date' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}">
+        date
+      </a>
+    </th>
+    <th>actions</th>
+  </tr>
+</thead>
+
 	<tbody>
 
 	{% for obj in object_list %}
