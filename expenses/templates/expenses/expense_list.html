@@ -55,6 +55,7 @@
 
 {% include "_pagination.html" %}
 <hr>
+
 <table border="1">
   <caption>Summary per category</caption>
   <tr>
@@ -69,11 +70,23 @@
 
 <hr>
 <table border="1">
-  <caption>Total Amount Spent</caption>
+  <caption>Monthly Summary</caption>
   <tr>
-    <td>Total:</td>
-    <td>{{ total_amount_spent|floatformat:2 }}</td>
+    <th>Year</th>
+    <th>Month</th>
+    <th>Total Spent</th>
   </tr>
+  {% for entry in monthly_summary %}
+    <tr>
+      <td>{{ entry.date__year }}</td>
+      <td>{{ entry.date__month }}</td>
+      <td>{{ entry.total_spent|floatformat:2 }}</td>
+    </tr>
+  {% empty %}
+    <tr>
+      <td colspan="3">No data available</td>
+    </tr>
+  {% endfor %}
 </table>
 
 {% endblock %}

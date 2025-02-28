@@ -2,9 +2,11 @@ import csv
 from django.http import HttpResponse
 from django.views import View
 from django.views.generic.list import ListView
+from django.db.models import Sum
 from .forms import ExpenseSearchForm
 from .models import Expense, Category
 from .reports import summary_per_category
+from django.utils.timezone import now
 
 class ExpenseListView(ListView):
     model = Expense
@@ -37,13 +39,18 @@ class ExpenseListView(ListView):
         else:
             queryset = queryset.order_by("date" if order == "asc" else "-date")
 
-        total_amount_spent = sum(expense.amount for expense in queryset)
+        monthly_summary = (
+            queryset
+            .values("date__year", "date__month")
+            .annotate(total_spent=Sum("amount"))
+            .order_by("date__year", "date__month")
+        )
 
         return super().get_context_data(
             form=form,
             object_list=queryset,
             summary_per_category=summary_per_category(queryset),
-            total_amount_spent=total_amount_spent,
+            monthly_summary=monthly_summary,
             sort_by=sort_by,
             order=order,
             **kwargs

@@ -36,7 +36,7 @@ urlpatterns = [
          ),
          name='expense-delete'),
 
-    path('expense/export/csv/',
+    path('expense/export-csv/',
          ExpenseCSVExportView.as_view(),
          name='expense-export-csv'),
 
